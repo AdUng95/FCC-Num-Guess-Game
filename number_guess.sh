@@ -12,7 +12,6 @@ BEST_GAMES=$($PSQL "SELECT MIN(number_guesses) FROM users INNER JOIN games USING
 if [[ -z $AVAIL_USERNAME ]]
   then
   INSERT_USER=$($PSQL "INSERT INTO users(username) VALUES('$USERNAME')")
-  U_ID=$($PSQL "SELECT user_id FROM users WHERE name='$USERNAME'")
   echo "Welcome, $USERNAME! It looks like this is your first time here."
   else
   echo "Welcome back, $USERNAME! You have played $GAMES_PLAYED games, and your best game took $BEST_GAMES guesses."
@@ -42,7 +41,8 @@ do
         then
         TRIES=$(($TRIES + 1))
         echo "You guessed it in $TRIES tries. The secret number was $SECRET_NUMBER. Nice job!"
-        INSERT_GAMES=$($PSQL "INSERT INTO games(user_id, number_guesses) VALUES($U_ID, $TRIES)")
+        USER_ID=$($PSQL "SELECT user_id FROM users WHERE username = '$USERNAME'")
+        INSERT_GAMES=$($PSQL "INSERT INTO games(number_guesses, user_id) VALUES($TRIES, $USER_ID)")
         GUESSED=1
         exit
     fi
